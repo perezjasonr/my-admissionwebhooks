@@ -1,0 +1,22 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: "validate"
+webhooks:
+- name: "validate.example.com"
+  failurePolicy: Fail
+  rules:
+  - apiGroups:   ["", "apps"]
+    apiVersions: ["v1"]
+    operations:  ["CREATE"]
+    resources:   ["pods", "deployments"]
+    scope:       "Namespaced"
+  clientConfig:
+    service:
+      namespace: "webhook"
+      name: "webhook"
+      path: /validate/deployments
+    caBundle:  "<redacted> base64 encoded ca bundle goes here"
+  admissionReviewVersions: ["v1", "v1beta1"]
+  sideEffects: None
+  timeoutSeconds: 5

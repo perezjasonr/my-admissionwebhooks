@@ -1,0 +1,17 @@
+FROM python:3.8-slim-buster AS builder
+WORKDIR /app
+RUN pip3 install pipenv
+# other pip args: --user --ignore-installed, user would put in userbase?
+COPY Pipfile Pipfile.lock /app/
+ENV PIP_USER 1
+ENV PIP_IGNORE_INSTALLED 1
+RUN pipenv install --system  --deploy --ignore-pipfile
+
+FROM python:3.8-slim-buster AS final
+WORKDIR /app
+COPY --from=builder /root/.local/lib/ /root/.local/lib/
+# python -m site --user-base/--user-site or $BASEUSER
+# note flask is in --user-base bin
+COPY validating_admission_controller.py /app/
+EXPOSE 443
+ENTRYPOINT ["python", "validating_admission_controller.py"]
